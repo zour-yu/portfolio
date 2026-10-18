@@ -145,7 +145,7 @@ export function HoverRevealHero() {
             <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400" />
           </span>
           <span className="font-mono text-xs font-medium text-zinc-300 tracking-wide">
-            Available for Full Stack & Cloud Architecture
+            Available for Software Engineering Roles
           </span>
         </motion.div>
 
@@ -206,10 +206,17 @@ export function HoverRevealHero() {
         </motion.div>
       </div>
 
-      {/* Down Chevron indicator */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 hidden sm:flex flex-col items-center gap-1 text-zinc-400 hover:text-zinc-300 transition-colors pointer-events-none">
-        <ChevronDown className="h-4 w-4 animate-bounce" />
-      </div>
+      {/* Down Chevron indicator & Scroll Prompt */}
+      <a
+        href="#work"
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 hidden sm:flex flex-col items-center gap-1.5 text-zinc-400 hover:text-cyan-400 transition-all cursor-pointer group pointer-events-auto"
+        aria-label="Scroll down to featured work"
+      >
+        <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-400 group-hover:text-cyan-400 transition-colors">
+          Scroll to explore
+        </span>
+        <ChevronDown className="h-4 w-4 animate-bounce text-cyan-400/80 group-hover:text-cyan-400" />
+      </a>
     </section>
   );
 }

@@ -29,6 +29,7 @@ export function ContactSection() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -71,6 +72,7 @@ export function ContactSection() {
 
   const handleChange = (field: "name" | "email" | "message", value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    if (apiError) setApiError(null);
     if (touched[field]) {
       const error = validateField(field, value);
       setErrors((prev) => ({ ...prev, [field]: error }));
@@ -92,10 +94,35 @@ export function ContactSection() {
     }
 
     setIsSubmitting(true);
-    // Simulate swift network dispatch
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    setIsSubmitting(false);
-    setFormSubmitted(true);
+    setApiError(null);
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        if (data.error === "RESEND_API_KEY_MISSING") {
+          setApiError(
+            "Resend API key is not yet configured in .env.local. You can also send directly using your email client."
+          );
+        } else {
+          setApiError(data.error || "Failed to dispatch message. Please try again or reach out directly.");
+        }
+        setIsSubmitting(false);
+        return;
+      }
+
+      setIsSubmitting(false);
+      setFormSubmitted(true);
+    } catch (err: any) {
+      setApiError("Network connection error. Please try again or reach out directly via email.");
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -111,8 +138,8 @@ export function ContactSection() {
             Initiate a Conversation
           </h2>
           <p className="text-zinc-400 max-w-xl text-sm sm:text-base leading-relaxed">
-            Interested in discussing software engineering opportunities, full-stack web
-            development, or collaborative projects? Reach out directly.
+            Interested in discussing software engineering opportunities, internships, or
+            collaborative technical projects? Reach out directly.
           </p>
         </div>
 
@@ -253,8 +280,7 @@ export function ContactSection() {
               <ShieldCheck className="h-5 w-5 text-cyan-400 shrink-0" />
               <div className="text-xs text-zinc-300 leading-snug">
                 <span className="font-semibold text-white">Open to Opportunities:</span>{" "}
-                Currently seeking junior/entry full-stack software engineering positions and
-                internships.
+                Available for Software Engineering positions, internships, and junior engineering roles across the stack.
               </div>
             </div>
           </div>
@@ -297,6 +323,22 @@ export function ContactSection() {
                 </motion.div>
               ) : (
                 <form onSubmit={handleSubmit} noValidate className="space-y-4">
+                  {apiError && (
+                    <div className="p-3.5 rounded-lg border border-amber-500/30 bg-amber-950/20 text-xs text-amber-200 flex items-start gap-2.5">
+                      <AlertCircle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                      <div className="space-y-1">
+                        <div>{apiError}</div>
+                        <a
+                          href={`mailto:${email}?subject=Portfolio%20Inquiry%20from%20${encodeURIComponent(formData.name || "Visitor")}&body=${encodeURIComponent(formData.message)}`}
+                          className="inline-flex items-center gap-1 text-[11px] font-mono text-cyan-400 hover:underline"
+                        >
+                          <span>Open default email client instead</span>
+                          <ArrowUpRight className="h-3 w-3" />
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Name Field */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-mono text-zinc-300 flex items-center justify-between">
@@ -309,7 +351,7 @@ export function ContactSection() {
                     </label>
                     <input
                       type="text"
-                      placeholder="Jane Doe"
+                      placeholder="Your name"
                       value={formData.name}
                       onChange={(e) => handleChange("name", e.target.value)}
                       onBlur={() => handleBlur("name")}
@@ -339,7 +381,7 @@ export function ContactSection() {
                     </label>
                     <input
                       type="email"
-                      placeholder="jane@company.com"
+                      placeholder="your.email@example.com"
                       value={formData.email}
                       onChange={(e) => handleChange("email", e.target.value)}
                       onBlur={() => handleBlur("email")}

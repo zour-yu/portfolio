@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import "lenis/dist/lenis.css";
 import "./globals.css";
+import { SmoothScrollProvider } from "@/components/layout/SmoothScrollProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -71,14 +73,16 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} dark scroll-smooth`}
+      className={`${geistSans.variable} ${geistMono.variable} dark`}
     >
-      <body className="min-h-screen bg-zinc-950 text-zinc-100 antialiased font-sans selection:bg-cyan-500/20 selection:text-cyan-200 overflow-x-hidden">
+      <body className="min-h-screen bg-zinc-950 text-zinc-100 antialiased font-sans selection:bg-cyan-500/20 selection:text-cyan-200 overflow-x-clip">
         <div className="fixed inset-0 pointer-events-none bg-grid-pattern opacity-60 z-0" />
         <div className="fixed inset-0 pointer-events-none bg-radial-gradient z-0" />
-        <div className="relative z-10 flex min-h-screen flex-col">
-          {children}
-        </div>
+        <SmoothScrollProvider>
+          <div className="relative z-10 flex min-h-screen flex-col">
+            {children}
+          </div>
+        </SmoothScrollProvider>
       </body>
     </html>
   );
